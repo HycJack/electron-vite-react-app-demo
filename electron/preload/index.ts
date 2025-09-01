@@ -1,5 +1,18 @@
 import { ipcRenderer, contextBridge } from 'electron'
-
+import { ElectronAPI, ScreenshotData, ScreenshotSavedData } from '../../src/type/electron';
+const electronAPI: ElectronAPI = {
+  startScreenshot: () => ipcRenderer.invoke('start-screenshot'),
+  getDownloadsPath: () => ipcRenderer.invoke('get-downloads-path'),
+  onScreenshotCaptured: (callback: (event: any, data: ScreenshotData) => void) => 
+    ipcRenderer.on('screenshot-captured', callback),
+  onScreenshotCancelled: (callback: () => void) =>
+    ipcRenderer.on('screenshot-cancelled', callback),
+  onScreenshotSaved: (callback: (event: any, data: ScreenshotSavedData) => void) =>
+    ipcRenderer.on('screenshot-saved', callback),
+  removeAllListeners: (channel: string) => 
+    ipcRenderer.removeAllListeners(channel)
+};
+contextBridge.exposeInMainWorld('electronAPI', electronAPI);
 // --------- Expose some API to the Renderer process ---------
 contextBridge.exposeInMainWorld('ipcRenderer', {
   on(...args: Parameters<typeof ipcRenderer.on>) {

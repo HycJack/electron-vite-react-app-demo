@@ -1,4 +1,4 @@
-import { app, BrowserWindow, shell, ipcMain } from 'electron'
+import { app, BrowserWindow, shell, ipcMain, globalShortcut } from 'electron'
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
@@ -7,7 +7,7 @@ import { update } from './update'
 
 const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-
+let screenshots: any = null;
 // The built directory structure
 //
 // ├─┬ dist-electron
@@ -44,6 +44,8 @@ const preload = path.join(__dirname, '../preload/index.mjs')
 const indexHtml = path.join(RENDERER_DIST, 'index.html')
 
 async function createWindow() {
+  // 在主进程 ready 后动态导入原生模块
+  const Screenshots = require('electron-screenshots');
   win = new BrowserWindow({
     title: 'Main window',
     icon: path.join(process.env.VITE_PUBLIC, 'favicon.ico'),
@@ -76,7 +78,47 @@ async function createWindow() {
     if (url.startsWith('https:')) shell.openExternal(url)
     return { action: 'deny' }
   })
+// 初始化截图工具
+  screenshots = new Screenshots({
+    lang: {
+      // @ts-ignore 忽略类型检查，因为 operate 不在 Lang 类型中
+      operate: {
+        exit: '退出', 
+        ok: '确认', 
+        cancel: '取消',
+        save: '保存',
+        reset: '重选'
+      }
+    }
+  });
 
+  // 截图完成事件Uint8Array
+  screenshots.on('ok', (e: any, buffer: Uint8Array, bounds: any) => {
+    win?.webContents.send('screenshot-captured', {
+      buffer: Buffer.from(buffer).toString("base64"),
+      bounds
+    });
+  });
+
+  screenshots.on('cancel', () => {
+    win?.webContents.send('screenshot-cancelled');
+  });
+
+  screenshots.on('save', (e: any, buffer: Buffer, bounds: any) => {
+    const fs = require('fs');
+    const path = require('path');
+    const downloadsPath = app.getPath('downloads');
+    const filename = `screenshot-${Date.now()}.png`;
+    const filepath = path.join(downloadsPath, filename);
+    
+    fs.writeFileSync(filepath, buffer);
+    win?.webContents.send('screenshot-saved', { filepath });
+  });
+
+  // 注册全局快捷键
+  globalShortcut.register('CommandOrControl+Shift+A', () => {
+    screenshots.startCapture();
+  });
   // Auto update
   update(win)
 }
@@ -104,7 +146,22 @@ app.on('activate', () => {
     createWindow()
   }
 })
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') app.quit();
+});
 
+app.on('will-quit', () => {
+  globalShortcut.unregisterAll();
+});
+
+// IPC 处理
+ipcMain.handle('start-screenshot', () => {
+  screenshots.startCapture();
+});
+
+ipcMain.handle('get-downloads-path', () => {
+  return app.getPath('downloads');
+});
 // New window example arg: new windows url
 ipcMain.handle('open-win', (_, arg) => {
   const childWindow = new BrowserWindow({
