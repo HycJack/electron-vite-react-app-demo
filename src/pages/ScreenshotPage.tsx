@@ -1,22 +1,52 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { Camera } from 'lucide-react'
-import { ScreenshotData } from '../type/electron'
+import { ScreenshotData, ScreenshotSavedData } from '../type/electron'
+import { handleScreenshot as handleScreenshotService, saveScreenshot as saveScreenshotService } from '@/services/screenshotService'
 
-interface ScreenshotPageProps {
-  status: string
-  screenshotData: ScreenshotData | null
-  downloadsPath: string
-  handleScreenshot: () => Promise<void>
-  saveScreenshot: () => void
-}
+const ScreenshotPage: React.FC = () => {
+  const [status, setStatus] = useState<string>('等待截图...')
+  const [screenshotData, setScreenshotData] = useState<ScreenshotData | null>(null)
+  const [downloadsPath, setDownloadsPath] = useState<string>('')
 
-const ScreenshotPage: React.FC<ScreenshotPageProps> = ({ 
-  status, 
-  screenshotData, 
-  downloadsPath, 
-  handleScreenshot, 
-  saveScreenshot 
-}) => {
+  // 获取下载路径并设置事件监听
+  useEffect(() => {
+    // 获取下载路径
+    window.electronAPI.getDownloadsPath().then((path: string) => {
+      setDownloadsPath(path)
+    })
+
+    // 设置监听器
+    window.electronAPI.onScreenshotCaptured((event: any, data: ScreenshotData) => {
+      setScreenshotData(data)
+      setStatus('截图完成！')
+    })
+
+    window.electronAPI.onScreenshotCancelled(() => {
+      setStatus('截图已取消')
+      setTimeout(() => setStatus('等待截图...'), 2000)
+    })
+
+    window.electronAPI.onScreenshotSaved((event: any, data: ScreenshotSavedData) => {
+      setStatus(`截图已保存至: ${data.filepath}`)
+    })
+
+    // 清理监听器
+    return () => {
+      window.electronAPI.removeAllListeners('screenshot-captured')
+      window.electronAPI.removeAllListeners('screenshot-cancelled')
+      window.electronAPI.removeAllListeners('screenshot-saved')
+    }
+  }, [])
+
+  // 处理截图
+  const handleScreenshot = async (): Promise<void> => {
+    handleScreenshotService(setStatus)
+  }
+
+  // 保存截图
+  const saveScreenshot = (): void => {
+    saveScreenshotService(screenshotData, setStatus)
+  }
   return (
     <div className='screenshot-container'>
       <h2 className='screenshot-title'>

@@ -3,7 +3,6 @@ import UpdateElectron from '@/components/update'
 import './App.css'
 // 导入lucide图标
 import { Menu, X, ChevronRight, ChevronLeft, Upload, FileText, Settings, Music, Video, Info, FileDown, Camera } from 'lucide-react'
-import { ScreenshotData, ScreenshotSavedData } from './type/electron'
 
 // 导入页面组件
 import UploadPage from '@/pages/UploadPage'
@@ -17,9 +16,6 @@ function App() {
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [activeMenuItem, setActiveMenuItem] = useState('upload') // 默认选中上传页面
-  const [screenshotData, setScreenshotData] = useState<ScreenshotData | null>(null)
-  const [status, setStatus] = useState<string>('等待截图...')
-  const [downloadsPath, setDownloadsPath] = useState<string>('')
 
   // 监听窗口大小变化，小于768px时自动收起侧边栏
   useEffect(() => {
@@ -31,32 +27,9 @@ function App() {
     handleResize()
     window.addEventListener('resize', handleResize)
 
-    // 获取下载路径
-    window.electronAPI.getDownloadsPath().then((path: string) => {
-      setDownloadsPath(path)
-    })
-
-    // 设置监听器
-    window.electronAPI.onScreenshotCaptured((event: any, data: ScreenshotData) => {
-      setScreenshotData(data)
-      setStatus('截图完成！')
-    })
-
-    window.electronAPI.onScreenshotCancelled(() => {
-      setStatus('截图已取消')
-      setTimeout(() => setStatus('等待截图...'), 2000)
-    })
-
-    window.electronAPI.onScreenshotSaved((event: any, data: ScreenshotSavedData) => {
-      setStatus(`截图已保存至: ${data.filepath}`)
-    })
-
     // 清理监听器
     return () => {
       window.removeEventListener('resize', handleResize)
-      window.electronAPI.removeAllListeners('screenshot-captured')
-      window.electronAPI.removeAllListeners('screenshot-cancelled')
-      window.electronAPI.removeAllListeners('screenshot-saved')
     }
   }, [])
 
@@ -66,21 +39,6 @@ function App() {
 
   const handleMenuItemClick = (menuItem: string) => {
     setActiveMenuItem(menuItem)
-  }
-
-  const handleScreenshot = async (): Promise<void> => {
-    setStatus('正在截图...')
-    await window.electronAPI.startScreenshot()
-  }
-
-  const saveScreenshot = (): void => {
-    if (screenshotData) {
-      const link = document.createElement('a')
-      link.href = `data:image/png;base64,${screenshotData.buffer}`
-      link.download = `screenshot-${Date.now()}.png`
-      link.click()
-      setStatus('截图已下载')
-    }
   }
 
   return (
@@ -131,15 +89,7 @@ function App() {
         {activeMenuItem === 'featureTwo' && <FeatureTwoPage />}
         {activeMenuItem === 'featureThree' && <FeatureThreePage />}
         {activeMenuItem === 'settings' && <SettingsPage />}
-        {activeMenuItem === 'screenshot' && (
-          <ScreenshotPage
-            status={status}
-            screenshotData={screenshotData}
-            downloadsPath={downloadsPath}
-            handleScreenshot={handleScreenshot}
-            saveScreenshot={saveScreenshot}
-          />
-        )}
+        {activeMenuItem === 'screenshot' && <ScreenshotPage />}
       </main>
     </div>
   )
