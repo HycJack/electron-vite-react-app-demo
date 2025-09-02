@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
+import { ThemeProvider } from '@/context/ThemeContext'
 import UpdateElectron from '@/components/update'
 import './App.css'
 // 导入lucide图标
-import { Menu, X, ChevronRight, ChevronLeft, Upload, FileText, Settings, Music, Video, Info, FileDown, Camera } from 'lucide-react'
+import { Menu, X, ArrowRight, ArrowLeft, Upload, FileText, Settings, Music, Video, Info, FileDown, Camera } from 'lucide-react'
 
 // 导入页面组件
 import UploadPage from '@/pages/UploadPage'
@@ -42,36 +43,35 @@ function App() {
   }
 
   return (
-    <div className='App-container'>
+    <ThemeProvider>
+      <div className='App-container'>
       {/* 侧边栏 */}
       <aside className={`sidebar ${sidebarCollapsed ? 'collapsed' : ''}`}>
         <div className='sidebar-header'>
           <button onClick={toggleSidebar} className='toggle-btn'>
-            {sidebarCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+            {sidebarCollapsed ? <ArrowRight size={20} /> : <ArrowLeft size={20} />}
           </button>
         </div>
-        {!sidebarCollapsed && (
-          <>
-            <h2>导航菜单</h2>
-            <ul className='nav-menu'>
-              <li className={`nav-item ${activeMenuItem === 'upload' ? 'active' : ''}`} onClick={() => handleMenuItemClick('upload')}>
-                <Upload size={18} className='icon' /> 文件上传
-              </li>
-              <li className={`nav-item ${activeMenuItem === 'featureTwo' ? 'active' : ''}`} onClick={() => handleMenuItemClick('featureTwo')}>
-                <FileText size={18} className='icon' /> 功能二
-              </li>
-              <li className={`nav-item ${activeMenuItem === 'featureThree' ? 'active' : ''}`} onClick={() => handleMenuItemClick('featureThree')}>
-                <Music size={18} className='icon' /> 功能三
-              </li>
-              <li className={`nav-item ${activeMenuItem === 'settings' ? 'active' : ''}`} onClick={() => handleMenuItemClick('settings')}>
-                <Settings size={18} className='icon' /> 设置
-              </li>
-              <li className={`nav-item ${activeMenuItem === 'screenshot' ? 'active' : ''}`} onClick={() => handleMenuItemClick('screenshot')}>
-                <Camera size={18} className='icon' /> 截图功能
-              </li>
-            </ul>
-          </>
-        )}
+        <div className='menu-container'>
+          {!sidebarCollapsed && <h2>导航菜单</h2>}
+          <ul className='nav-menu'>
+            <li className={`nav-item ${activeMenuItem === 'upload' ? 'active' : ''}`} onClick={() => handleMenuItemClick('upload')}>
+              <Upload size={18} className='icon' /> <span>{!sidebarCollapsed && '文件上传'}</span>
+            </li>
+            <li className={`nav-item ${activeMenuItem === 'featureTwo' ? 'active' : ''}`} onClick={() => handleMenuItemClick('featureTwo')}>
+              <FileText size={18} className='icon' /> <span>{!sidebarCollapsed && '功能二'}</span>
+            </li>
+            <li className={`nav-item ${activeMenuItem === 'featureThree' ? 'active' : ''}`} onClick={() => handleMenuItemClick('featureThree')}>
+              <Music size={18} className='icon' /> <span>{!sidebarCollapsed && '功能三'}</span>
+            </li>
+            <li className={`nav-item ${activeMenuItem === 'settings' ? 'active' : ''}`} onClick={() => handleMenuItemClick('settings')}>
+              <Settings size={18} className='icon' /> <span>{!sidebarCollapsed && '设置'}</span>
+            </li>
+            <li className={`nav-item ${activeMenuItem === 'screenshot' ? 'active' : ''}`} onClick={() => handleMenuItemClick('screenshot')}>
+              <Camera size={18} className='icon' /> <span>{!sidebarCollapsed && '截图功能'}</span>
+            </li>
+          </ul>
+        </div>
         <div className='sidebar-footer'>
           {!sidebarCollapsed && <UpdateElectron />}
         </div>
@@ -92,6 +92,7 @@ function App() {
         {activeMenuItem === 'screenshot' && <ScreenshotPage />}
       </main>
     </div>
+  </ThemeProvider>
   )
 }
 

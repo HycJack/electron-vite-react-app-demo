@@ -12,6 +12,13 @@ export interface ScreenshotSavedData {
   filepath: string;
 }
 
+export interface AppConfig {
+  darkMode: boolean;
+  notifications: boolean;
+  language: string;
+  themeColor: string;
+}
+
 export interface ElectronAPI {
   startScreenshot: () => Promise<void>;
   getDownloadsPath: () => Promise<string>;
@@ -19,6 +26,8 @@ export interface ElectronAPI {
   onScreenshotCancelled: (callback: () => void) => void;
   onScreenshotSaved: (callback: (event: any, data: ScreenshotSavedData) => void) => void;
   removeAllListeners: (channel: string) => void;
+  loadConfig: () => Promise<AppConfig>;
+  saveConfig: (config: AppConfig) => Promise<boolean>;
 }
 
 declare global {

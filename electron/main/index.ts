@@ -1,4 +1,5 @@
 import { app, BrowserWindow, shell, ipcMain, globalShortcut } from 'electron'
+import fs from 'node:fs'
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
@@ -154,6 +155,42 @@ app.on('will-quit', () => {
   globalShortcut.unregisterAll();
 });
 
+// 配置文件处理
+const configPath = path.join(app.getPath('userData'), 'config.json');
+
+// 默认配置
+const defaultConfig = {
+  darkMode: false,
+  notifications: true,
+  language: 'zh',
+  themeColor: '#3b82f6'
+};
+
+// 加载配置
+function loadConfig() {
+  try {
+    if (fs.existsSync(configPath)) {
+      const data = fs.readFileSync(configPath, 'utf8');
+      return JSON.parse(data);
+    }
+    return defaultConfig;
+  } catch (error) {
+    console.error('Error loading config:', error);
+    return defaultConfig;
+  }
+}
+
+// 保存配置
+function saveConfig(config: any) {
+  try {
+    fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
+    return true;
+  } catch (error) {
+    console.error('Error saving config:', error);
+    return false;
+  }
+}
+
 // IPC 处理
 ipcMain.handle('start-screenshot', () => {
   screenshots.startCapture();
@@ -162,6 +199,17 @@ ipcMain.handle('start-screenshot', () => {
 ipcMain.handle('get-downloads-path', () => {
   return app.getPath('downloads');
 });
+
+// 配置相关 IPC 处理
+ipcMain.handle('load-config', () => {
+  return loadConfig();
+});
+
+ipcMain.handle('save-config', (_, config) => {
+  return saveConfig(config);
+});
+
+
 // New window example arg: new windows url
 ipcMain.handle('open-win', (_, arg) => {
   const childWindow = new BrowserWindow({

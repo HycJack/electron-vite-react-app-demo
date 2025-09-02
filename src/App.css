@@ -1,13 +1,33 @@
 /* 全局样式 */
+:root {
+  --theme-color: #3b82f6; /* 默认主题色 */
+  --bg-color: #ffffff;
+  --text-color: #333333;
+  --sidebar-bg: #f0f0f0;
+  --sidebar-border: #ddd;
+  --hover-bg: #e0e0e0;
+}
+
+.dark-mode {
+  --bg-color: #1e1e1e;
+  --text-color: #f0f0f0;
+  --sidebar-bg: #2d2d2d;
+  --sidebar-border: #444;
+  --hover-bg: #3d3d3d;
+}
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  color: var(--text-color);
 }
 
 #root {
   height: 100vh;
   width: 100%;
+  background-color: var(--bg-color);
+  transition: background-color 0.3s ease;
 }
 
 /* 容器样式 */
@@ -15,17 +35,19 @@
   display: flex;
   height: 100vh;
   width: 100%;
+  background-color: var(--bg-color);
+  transition: background-color 0.3s ease;
 }
 
 /* 侧边栏样式 */
 .sidebar {
   width: 250px;
-  background-color: #f0f0f0;
+  background-color: var(--sidebar-bg);
   padding: 1rem;
   display: flex;
   flex-direction: column;
-  border-right: 1px solid #ddd;
-  transition: width 0.3s ease;
+  border-right: 1px solid var(--sidebar-border);
+  transition: width 0.3s ease, background-color 0.3s ease;
 }
 
 /* 侧边栏收起状态 */
@@ -60,15 +82,54 @@
 }
 
 .toggle-btn:hover {
-  background-color: #e0e0e0;
+  background-color: var(--hover-bg);
 }
 
 /* 收起状态下隐藏文本内容 */
 .sidebar.collapsed h2,
-.sidebar.collapsed .nav-menu,
 .sidebar.collapsed .sidebar-footer {
   display: none;
 }
+
+/* 收起状态下的导航菜单 */
+.sidebar.collapsed .nav-menu {
+  display: block;
+}
+
+/* 收起状态下的菜单项文本隐藏 */
+.sidebar.collapsed .nav-item span {
+  display: none;
+}
+
+/* 收起状态下的菜单项样式调整 */
+.sidebar.collapsed .nav-item {
+  justify-content: center;
+  padding: 0.8rem 0;
+  width: 100%;
+}
+
+/* 菜单项样式 */
+.nav-item {
+  display: flex;
+  align-items: center;
+  padding: 0.8rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+/* 菜单项图标样式 */
+.nav-item .icon {
+  margin-right: 0.8rem;
+}
+
+/* 收起状态下的菜单项图标样式 */
+.sidebar.collapsed .nav-item .icon {
+  margin-right: 0;
+  display: block;
+  margin: 0 auto;
+}
+
 
 /* 收起状态下调整logo位置 */
 .sidebar.collapsed .logo {
@@ -134,11 +195,11 @@
 }
 
 .nav-item:hover {
-  background-color: #e0e0e0;
+  background-color: var(--hover-bg);
 }
 
 .nav-item.active {
-  background-color: #646cff;
+  background-color: var(--theme-color);
   color: white;
 }
 
@@ -146,7 +207,7 @@
 .sidebar-footer {
   margin-top: auto;
   padding-top: 1rem;
-  border-top: 1px solid #ddd;
+  border-top: 1px solid var(--sidebar-border);
 }
 
 /* 主内容区域 */
@@ -154,6 +215,217 @@
   flex: 1;
   padding: 2rem;
   overflow-y: auto;
+  background-color: var(--bg-color);
+  transition: background-color 0.3s ease;
+}
+
+/* 设置页面样式 */
+.settings-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.settings-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  color: var(--text-color);
+}
+
+.settings-icon {
+  color: var(--theme-color);
+}
+
+.controls {
+  margin-bottom: 1.5rem;
+}
+
+.save-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: var(--theme-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.save-btn:hover {
+  opacity: 0.9;
+}
+
+.save-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.save-icon {
+  color: white;
+}
+
+.status {
+  margin-bottom: 1.5rem;
+  padding: 0.5rem;
+  border-radius: 4px;
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.settings-content {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.setting-card {
+  padding: 1.5rem;
+  border-radius: 8px;
+  background-color: rgba(255, 255, 255, 0.7);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.dark-mode .setting-card {
+  background-color: rgba(40, 40, 40, 0.7);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.card-title {
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.setting-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #eee;
+}
+
+.dark-mode .setting-item {
+  border-bottom-color: #333;
+}
+
+.setting-item:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.setting-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-color);
+}
+
+.setting-toggle {
+  width: 40px;
+  height: 20px;
+  border-radius: 10px;
+  background-color: #ddd;
+  appearance: none;
+  cursor: pointer;
+  position: relative;
+  transition: background-color 0.2s;
+}
+
+.setting-toggle:checked {
+  background-color: var(--theme-color);
+}
+
+.setting-toggle:before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: white;
+  transition: transform 0.2s;
+}
+
+.setting-toggle:checked:before {
+  transform: translateX(20px);
+}
+
+.setting-select {
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: white;
+  color: var(--text-color);
+  cursor: pointer;
+  transition: border-color 0.2s, background-color 0.3s;
+}
+
+.dark-mode .setting-select {
+  border-color: #444;
+  background-color: #333;
+}
+
+.color-picker {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.color-option {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.2s;
+}
+
+.color-option:hover {
+  transform: scale(1.1);
+}
+
+.color-option.selected {
+  border-color: #fff;
+  box-shadow: 0 0 0 2px var(--theme-color);
+}
+
+.selected-indicator {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-weight: bold;
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+}
+
+.instructions {
+  padding: 1rem;
+  border-radius: 4px;
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.instructions h3 {
+  margin-bottom: 0.5rem;
+  color: var(--text-color);
+}
+
+.instructions ul {
+  padding-left: 1.5rem;
+  color: var(--text-color);
+}
+
+.instructions li {
+  margin-bottom: 0.25rem;
 }
 
 .main-header {

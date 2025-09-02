@@ -1,5 +1,5 @@
 import { ipcRenderer, contextBridge } from 'electron'
-import { ElectronAPI, ScreenshotData, ScreenshotSavedData } from '../../src/type/electron';
+import { ElectronAPI, ScreenshotData, ScreenshotSavedData, AppConfig } from '../../src/type/electron';
 const electronAPI: ElectronAPI = {
   startScreenshot: () => ipcRenderer.invoke('start-screenshot'),
   getDownloadsPath: () => ipcRenderer.invoke('get-downloads-path'),
@@ -10,7 +10,9 @@ const electronAPI: ElectronAPI = {
   onScreenshotSaved: (callback: (event: any, data: ScreenshotSavedData) => void) =>
     ipcRenderer.on('screenshot-saved', callback),
   removeAllListeners: (channel: string) => 
-    ipcRenderer.removeAllListeners(channel)
+    ipcRenderer.removeAllListeners(channel),
+  loadConfig: () => ipcRenderer.invoke('load-config'),
+  saveConfig: (config: AppConfig) => ipcRenderer.invoke('save-config', config)
 };
 contextBridge.exposeInMainWorld('electronAPI', electronAPI);
 // --------- Expose some API to the Renderer process ---------
