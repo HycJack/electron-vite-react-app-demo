@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Settings, Moon, Sun, Bell, BellOff, Globe, Palette, Save } from 'lucide-react'
+import { Settings, Moon, Sun, Bell, BellOff, Globe, Palette, Save, Palette as ModeIcon } from 'lucide-react'
 import { saveConfig } from '@/services/configService'
 import { AppConfig } from '@/type/electron'
 import { useTheme } from '@/context/ThemeContext'
@@ -60,19 +60,21 @@ const SettingsPage: React.FC = () => {
       </div>
 
       <div className='settings-content'>
-        <div className='setting-card'>
+        {/* <div className='setting-card'>
           <h3 className='card-title'>外观设置</h3>
           <div className='setting-item'>
             <label className='setting-label'>
-              {config.darkMode ? <Moon size={18} className='icon' /> : <Sun size={18} className='icon' />}
-              深色模式
+              <ModeIcon size={18} className='icon' />
+              主题模式
             </label>
-            <input
-              type='checkbox'
-              checked={config.darkMode}
-              onChange={(e) => handleConfigChange('darkMode', e.target.checked)}
-              className='setting-toggle'
-            />
+            <select
+              className='setting-select'
+              value={config.mode}
+              onChange={(e) => handleConfigChange('mode', e.target.value as 'light' | 'dark')}
+            >
+              <option value='light'>浅色模式</option>
+              <option value='dark'>深色模式</option>
+            </select>
           </div>
           <div className='setting-item'>
             <label className='setting-label'>
@@ -127,6 +129,46 @@ const SettingsPage: React.FC = () => {
               ))}
             </div>
           </div>
+        </div> */}
+
+        <div className='setting-card'>
+          <h3 className='card-title'>大模型设置</h3>
+          <div className='setting-item'>
+            <label className='setting-label'>
+              模型ID
+            </label>
+            <input
+              type='text'
+              value={config.modelId}
+              onChange={(e) => handleConfigChange('modelId', e.target.value)}
+              className='setting-input'
+              placeholder='例如: gpt-3.5-turbo'
+            />
+          </div>
+          <div className='setting-item'>
+            <label className='setting-label'>
+              Base URL
+            </label>
+            <input
+              type='text'
+              value={config.baseUrl}
+              onChange={(e) => handleConfigChange('baseUrl', e.target.value)}
+              className='setting-input'
+              placeholder='例如: https://api.openai.com/v1'
+            />
+          </div>
+          <div className='setting-item'>
+            <label className='setting-label'>
+              API Key
+            </label>
+            <input
+              type='password'
+              value={config.apiKey}
+              onChange={(e) => handleConfigChange('apiKey', e.target.value)}
+              className='setting-input'
+              placeholder='输入你的API密钥'
+            />
+          </div>
         </div>
       </div>
 
@@ -134,7 +176,7 @@ const SettingsPage: React.FC = () => {
         <h3>使用说明：</h3>
         <ul>
           <li>修改设置后点击"保存配置"按钮生效</li>
-          <li>深色模式会改变应用的整体色调</li>
+          <li>主题模式可以切换浅色和深色两种显示模式</li>
           <li>通知开关控制应用的消息提醒</li>
           <li>选择主题颜色可以个性化应用外观</li>
         </ul>

@@ -1,5 +1,18 @@
 import { ipcRenderer, contextBridge } from 'electron'
 import { ElectronAPI, ScreenshotData, ScreenshotSavedData, AppConfig } from '../../src/type/electron';
+
+// 扩展ElectronAPI接口以支持流式消息
+declare module '../../src/type/electron' {
+  interface ElectronAPI {
+    sendLlmMessageStream(
+      messages: { role: 'user' | 'assistant' | 'system', content: string }[],
+      onChunk: (chunk: string) => void,
+      onComplete: () => void,
+      onError: (error: string) => void
+    ): void;
+  }
+}
+
 const electronAPI: ElectronAPI = {
   startScreenshot: () => ipcRenderer.invoke('start-screenshot'),
   getDownloadsPath: () => ipcRenderer.invoke('get-downloads-path'),
@@ -12,7 +25,31 @@ const electronAPI: ElectronAPI = {
   removeAllListeners: (channel: string) => 
     ipcRenderer.removeAllListeners(channel),
   loadConfig: () => ipcRenderer.invoke('load-config'),
-  saveConfig: (config: AppConfig) => ipcRenderer.invoke('save-config', config)
+  saveConfig: (config: AppConfig) => ipcRenderer.invoke('save-config', config),
+  sendLlmMessage: (messages) => ipcRenderer.invoke('send-llm-message', messages),
+  sendLlmMessageStream: (messages, onChunk, onComplete, onError) => {
+    // 设置一次性监听器以接收流式响应
+    const chunkId = 'llm-stream-chunk-' + Date.now();
+    const completeId = 'llm-stream-complete-' + Date.now();
+    const errorId = 'llm-stream-error-' + Date.now();
+
+    ipcRenderer.on(chunkId, (_, chunk) => onChunk(chunk));
+    ipcRenderer.on(completeId, () => {
+      ipcRenderer.removeAllListeners(chunkId);
+      ipcRenderer.removeAllListeners(completeId);
+      ipcRenderer.removeAllListeners(errorId);
+      onComplete();
+    });
+    ipcRenderer.on(errorId, (_, error) => {
+      ipcRenderer.removeAllListeners(chunkId);
+      ipcRenderer.removeAllListeners(completeId);
+      ipcRenderer.removeAllListeners(errorId);
+      onError(error);
+    });
+
+    // 发送消息到主进程
+    ipcRenderer.send('send-llm-message-stream', messages, chunkId, completeId, errorId);
+  }
 };
 contextBridge.exposeInMainWorld('electronAPI', electronAPI);
 // --------- Expose some API to the Renderer process ---------

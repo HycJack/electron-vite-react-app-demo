@@ -5,7 +5,7 @@ const FeatureThreePage: React.FC = () => {
   return (
     <div className='feature-three-container'>
       <h2 className='feature-three-title'>
-        <Music size={24} className='feature-three-icon' /> 功能三
+        <Music size={24} className='feature-three-icon' /> 音乐播放器
       </h2>
       <div className='feature-three-content'>
         <p>这是功能三的内容区域。</p>

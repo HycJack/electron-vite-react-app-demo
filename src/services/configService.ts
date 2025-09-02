@@ -5,10 +5,14 @@ import { AppConfig } from "@/type/electron";
  * 默认配置
  */
 const defaultConfig: AppConfig = {
-  darkMode: false,
   notifications: true,
   language: 'zh',
-  themeColor: '#3b82f6'
+  themeColor: '#3b82f6',
+  mode: 'light',
+  // 大模型默认配置
+  modelId: 'gpt-3.5-turbo',
+  baseUrl: 'https://api.openai.com/v1',
+  apiKey: ''
 };
 
 /**

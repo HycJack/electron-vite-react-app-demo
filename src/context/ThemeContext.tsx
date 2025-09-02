@@ -6,6 +6,7 @@ import { loadConfig } from '@/services/configService'
 interface ThemeContextType {
   config: AppConfig
   updateConfig: (newConfig: Partial<AppConfig>) => void
+  toggleMode: () => void
 }
 
 export const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
@@ -13,10 +14,13 @@ export const ThemeContext = createContext<ThemeContextType | undefined>(undefine
 // 主题提供者组件
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [config, setConfig] = useState<AppConfig>({
-    darkMode: false,
     notifications: true,
+    modelId: '',
+    baseUrl: '',
+    apiKey: '',
     language: 'zh',
-    themeColor: '#3b82f6'
+    themeColor: '#3b82f6',
+    mode: 'light'
   })
 
   // 加载配置
@@ -31,15 +35,24 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // 应用主题
   const applyTheme = (config: AppConfig) => {
-    // 应用深色模式
-    if (config.darkMode) {
+    // 设置mode属性
+    document.documentElement.setAttribute('data-mode', config.mode)
+
+    // 应用主题色
+    document.documentElement.style.setProperty('--theme-color', config.themeColor)
+
+    // 根据mode设置深色模式类
+    if (config.mode === 'dark') {
       document.documentElement.classList.add('dark-mode')
     } else {
       document.documentElement.classList.remove('dark-mode')
     }
+  }
 
-    // 应用主题色
-    document.documentElement.style.setProperty('--theme-color', config.themeColor)
+  // 切换模式
+  const toggleMode = () => {
+    const newMode = config.mode === 'light' ? 'dark' : 'light'
+    updateConfig({ mode: newMode })
   }
 
   // 更新配置
@@ -50,7 +63,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }
 
   return (
-    <ThemeContext.Provider value={{ config, updateConfig }}>
+    <ThemeContext.Provider value={{ config, updateConfig, toggleMode }}>
       {children}
     </ThemeContext.Provider>
   )

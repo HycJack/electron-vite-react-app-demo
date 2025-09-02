@@ -13,10 +13,14 @@ export interface ScreenshotSavedData {
 }
 
 export interface AppConfig {
-  darkMode: boolean;
   notifications: boolean;
   language: string;
   themeColor: string;
+  mode: 'light' | 'dark';
+  // 大模型配置
+  modelId: string;
+  baseUrl: string;
+  apiKey: string;
 }
 
 export interface ElectronAPI {
@@ -28,6 +32,7 @@ export interface ElectronAPI {
   removeAllListeners: (channel: string) => void;
   loadConfig: () => Promise<AppConfig>;
   saveConfig: (config: AppConfig) => Promise<boolean>;
+  sendLlmMessage: (messages: { role: 'user' | 'assistant' | 'system', content: string }[]) => Promise<{ success: boolean; data?: string; error?: string }>;
 }
 
 declare global {

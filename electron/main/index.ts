@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import os from 'node:os'
 import { update } from './update'
+import llmService from '../services/llmService'
 
 const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -160,7 +161,7 @@ const configPath = path.join(app.getPath('userData'), 'config.json');
 
 // 默认配置
 const defaultConfig = {
-  darkMode: false,
+  mode: 'light',
   notifications: true,
   language: 'zh',
   themeColor: '#3b82f6'
@@ -184,6 +185,8 @@ function loadConfig() {
 function saveConfig(config: any) {
   try {
     fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
+    // 更新LLM服务的配置
+    llmService.updateConfig(config);
     return true;
   } catch (error) {
     console.error('Error saving config:', error);
@@ -196,17 +199,58 @@ ipcMain.handle('start-screenshot', () => {
   screenshots.startCapture();
 });
 
+// 处理LLM消息（非流式）
+ipcMain.handle('send-llm-message', async (_, messages) => {
+  try {
+    const response = await llmService.sendMessage(messages);
+    return { success: true, data: response };
+  } catch (error) {
+    console.error('LLM消息处理错误:', error);
+    return { success: false, error: error instanceof Error ? error.message : String(error) };
+  }
+});
+
+// 处理LLM消息（流式）
+ipcMain.on('send-llm-message-stream', (event, messages, chunkId, completeId, errorId) => {
+  llmService.sendMessageStream(
+    messages,
+    (chunk) => {
+      event.sender.send(chunkId, chunk);
+    },
+    () => {
+      event.sender.send(completeId);
+    },
+    (error) => {
+      event.sender.send(errorId, error.message);
+    }
+  );
+});
+
 ipcMain.handle('get-downloads-path', () => {
   return app.getPath('downloads');
 });
 
 // 配置相关 IPC 处理
 ipcMain.handle('load-config', () => {
-  return loadConfig();
+  const config = loadConfig();
+  // 确保LLM服务有最新的配置
+  llmService.updateConfig(config);
+  return config;
 });
 
 ipcMain.handle('save-config', (_, config) => {
   return saveConfig(config);
+});
+
+// LLM服务相关 IPC 处理
+ipcMain.handle('send-llm-message', async (_, messages) => {
+  try {
+    const response = await llmService.sendMessage(messages);
+    return { success: true, data: response };
+  } catch (error) {
+    console.error('LLM消息发送失败:', error);
+    return { success: false, error: error instanceof Error ? error.message : '未知错误' };
+  }
 });
 
 

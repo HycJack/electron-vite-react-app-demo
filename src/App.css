@@ -8,10 +8,10 @@
   --hover-bg: #e0e0e0;
 }
 
-.dark-mode {
+[data-mode='dark'] {
   --bg-color: #1e1e1e;
   --text-color: #f0f0f0;
-  --sidebar-bg: #2d2d2d;
+  --sidebar-bg: #1e1e1e;
   --sidebar-border: #444;
   --hover-bg: #3d3d3d;
 }
