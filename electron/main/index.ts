@@ -243,15 +243,15 @@ ipcMain.handle('save-config', (_, config) => {
 });
 
 // LLM服务相关 IPC 处理
-ipcMain.handle('send-llm-message', async (_, messages) => {
-  try {
-    const response = await llmService.sendMessage(messages);
-    return { success: true, data: response };
-  } catch (error) {
-    console.error('LLM消息发送失败:', error);
-    return { success: false, error: error instanceof Error ? error.message : '未知错误' };
-  }
-});
+// ipcMain.handle('send-llm-message', async (_, messages) => {
+//   try {
+//     const response = await llmService.sendMessage(messages);
+//     return { success: true, data: response };
+//   } catch (error) {
+//     console.error('LLM消息发送失败:', error);
+//     return { success: false, error: error instanceof Error ? error.message : '未知错误' };
+//   }
+// });
 
 
 // New window example arg: new windows url
